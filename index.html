@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>드론 구술평가 암기 퀴즈</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #10b981;
+            --success-hover: #059669;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --sub-text: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px;
+        }
+
+        .title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .progress {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--sub-text);
+            background-color: #e0e7ff;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 330px;
+            touch-action: pan-y;
+            user-select: none;
+            position: relative;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .q-number {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-star {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #cbd5e1;
+            padding: 0 4px;
+            transition: color 0.2s, transform 0.1s;
+        }
+
+        .btn-star.active {
+            color: var(--warning);
+            transform: scale(1.15);
+        }
+
+        .question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.5;
+            word-break: keep-all;
+            white-space: pre-line;
+        }
+
+        .answer-box {
+            display: none;
+            background-color: #f1f5f9;
+            border-left: 4px solid var(--primary);
+            padding: 14px;
+            border-radius: 0 8px 8px 0;
+            margin-top: auto;
+        }
+
+        .answer-box.show {
+            display: block;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        .answer-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--sub-text);
+            margin-bottom: 4px;
+        }
+
+        .answer-text {
+            font-size: 0.95rem;
+            line-height: 1.55;
+            white-space: pre-line;
+            color: #1e293b;
+            word-break: keep-all;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-toggle {
+            flex: 2;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background-color: var(--primary);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-exclude {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background-color: var(--success);
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-exclude:active {
+            background-color: var(--success-hover);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-nav {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background-color: var(--card-bg);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .option-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .option-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--sub-text);
+            cursor: pointer;
+        }
+
+        .btn-reset {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .empty-msg {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--sub-text);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="title">🚁 드론 구술평가</div>
+        <div class="progress" id="progress">남은 문제: 57개</div>
+    </div>
+
+    <div class="card" id="card">
+        <div class="card-top">
+            <div class="q-number" id="qNum">QUESTION 01</div>
+            <button class="btn-star" id="btnStar" onclick="toggleStar()" title="복습 문제로 체크">★</button>
+        </div>
+        
+        <div class="question" id="qText">문제를 불러오는 중입니다...</div>
+        
+        <div class="answer-box" id="ansBox">
+            <div class="answer-label">정답 및 해설</div>
+            <div class="answer-text" id="ansText"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="action-buttons">
+            <button class="btn-toggle" id="btnToggle" onclick="toggleAnswer()">정답 확인하기</button>
+            <button class="btn-exclude" onclick="excludeQuestion()">✅ 외웠어요</button>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn-nav" id="btnPrev" onclick="prevQuestion()">이전</button>
+            <button class="btn-nav" id="btnNext" onclick="nextQuestion()">다음</button>
+        </div>
+    </div>
+
+    <div class="option-bar">
+        <div class="option-row">
+            <label class="checkbox-label">
+                <input type="checkbox" id="chkRandom" checked onchange="handleOptionChange(true)"> 무작위(랜덤) 섞기
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="chkStarOnly" onchange="handleOptionChange(true)"> ⭐ 체크한 문제만 보기
+            </label>
+        </div>
+        <div class="option-row" style="margin-top: 4px;">
+            <label class="checkbox-label">
+                <input type="checkbox" id="chkAutoShow" onchange="handleAutoShowToggle()"> 정답 항상 표시
+            </label>
+            <button class="btn-reset" onclick="resetAll()">전체 학습 초기화</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    { id: 1, q: "시험 본 기체 형식은 무엇인가요", a: "헥사콥터" },[cite: 4]
+    { id: 2, q: "기체제원은 어떻게 되나요", a: "자체중량 13kg, 배터리 포함 17.1kg\n최대이륙중량 26kg" },[cite: 4]
+    { id: 3, q: "배터리 규격은 어떻게 되나요", a: "리튬폴리머\n1셀당 기준전압3.7V 완충4.2V, 완전방전2.7V\n6셀 정격전압22.2V x2=44.4V, 완충전압25.2V x2=50.4V, 용량16,000mAh" },[cite: 4]
+    { id: 4, q: "시험 본 기체 규격", a: "기체: FC:N3\n가로, 세로, 높이, 작업시, 204.1/185.8/71, 보관, 운반시, 63 x 70 x 71\n모터: BL DC모터 120KV\n조종기: 모드 2, 그라프너, 주파수대 2.4Ghz. 최대 1.5km" },[cite: 4]
+    { id: 5, q: "프로펠러 규격 및 피치가 무엇인가요", a: "폴딩플럽, 26인치 X 8피치(도) *인치 : 직경길이, 피치: 1회전시 전진거리" },[cite: 4]
+    { id: 6, q: "프로펠러 전진시 빨리회전하는 방향은", a: "반대방향 프로펠러가 빨라진다" },[cite: 4]
+    { id: 7, q: "좌회전시 빨라지는 프로펠러는", a: "짝수(CW): 시계방향 프로펠러가 빨라진다" },[cite: 4]
+    { id: 8, q: "프로펠러 CCW와 CW 방향이 서로 다르게 돌아가는 이유는", a: "작용과 반작용 법칙으로 토크를 상쇄시키기 위해" },[cite: 4]
+    { id: 9, q: "CCW, CW하는 역할과 프로펠러가 어느 방향으로 돌아가나요?", a: "CCW는 홀수, 시계반대, CW는 짝수, 시계방향" },[cite: 4]
+    { id: 10, q: "센서종류에 대해서 아는데로 설명하세요", a: "1. 자이로센서: 자세\n2. 기압계센서: 고도\n3. 지자기(마그네틱)센서: 방향\n4. GPS 센서: 위치" },[cite: 4]
+    { id: 11, q: "안전성 검사인증은 어디서 받나요", a: "항공안전기술원" },[cite: 4]
+    { id: 12, q: "안전성 인증 기준은 무엇인가요.", a: "최대이륙중량 25kg초과, 자체중량 150kg이하(유효기간2년)" },[cite: 4]
+    { id: 13, q: "안전성 인증 검사 종류는 무엇인가요", a: "초도 검사, 정기 검사, 수시 검사, 재검사" },[cite: 4]
+    { id: 14, q: "비행계획 승인은 어디서 하나요", a: "지방항공청" },[cite: 4]
+    { id: 15, q: "배터리 보관 방법 및 폐기 방법은?", a: "보관: 상온22~28℃, 다습지역 보관금지\n장기보관: 40-60% 방전 상태\n폐기: 소금물에 담궈 기포가 완전히 사라지면 전압측정 후 볼트이면 일반폐기물로 폐기" },[cite: 4]
+    { id: 16, q: "조종자 응시 조건", a: "1종, 만14세 이상" },[cite: 4]
+    { id: 17, q: "조종자준수사항", a: "인구밀집지역 비행금지, 낙하물투하금지, 시계외 비행금지, 야간비행금지, 일출전 일몰후 비행금지, 음주 비행금지 (0.02%), 150M이상 비행금지" },[cite: 4]
+    { id: 18, q: "비행금지구역", a: "P61 기장고리 / P62 경주월성/P63 영광한빛/P64 울진한울/P65 대전원자력연구소 / P73 청와대 반경 3.7km, P518(휴전선 인근 경기북부에서 강원북부까지)" },[cite: 4]
+    { id: 19, q: "비행제한구역", a: "항공사격 대공사격 등으로 인한 위험으로부터 항공기의 안전을 보호 하거나 그 밖의 이유로 비행허가를 받지 않은 항공기의 비행을 제한하는 공역(R~)" },[cite: 4]
+    { id: 20, q: "관제권", a: "비행장과 주변 공역 관제탑 기준 9.3km이내로 항공교통 안전을 위하여 국토교통부 장관이 지정한 공역" },[cite: 4]
+    { id: 21, q: "관제구", a: "지표면 또는 수면으로부터 200m이상 높이 공역으로 항공 안전을 위한 국토교통부 장관이 지정한 공역" },[cite: 4]
+    { id: 22, q: "초경량비행장치 비행고도", a: "150m이하" },[cite: 4]
+    { id: 23, q: "기상조건", a: "우천 번개 혹은 강풍시 비행 중지" },[cite: 4]
+    { id: 24, q: "비행계획", a: "드론 운행을 하기 위한 경로, 고도" },[cite: 4]
+    { id: 25, q: "이륙 전 기체 문제 발생시 조치", a: "이륙 포기 후 기체 점검" },[cite: 4]
+    { id: 26, q: "노팀(NOTAM)", a: "안전운항을 위한 항공정보이며 유효기간은 3개월 SNS 배포" },[cite: 4]
+    { id: 27, q: "충돌 예방우선권", a: "동력을 이용하는 모든 항공기는 드론보다 우선권을 가지며 반드시 피한다." },[cite: 4]
+    { id: 28, q: "비행중 비상절차", a: "\"비상\"이라고 큰소리로 외치고, 사람을 드론으로부터 대피시키고 안전한곳에 착륙, 조종불가시 MANUAL로 전환 후 안전한 곳에 추락시킨다." },[cite: 5]
+    { id: 29, q: "사고발생시 대처사항", a: "119신고→ 교통안전공단 신고 철도항공조사위원회 조사받기" },[cite: 5]
+    { id: 30, q: "사고발생시 지방항공청 및 교통안전공단 보고사항", a: "기체번호, 조종자인적사항, 사고장소, 인명 피해 여부" },[cite: 5]
+    { id: 31, q: "자격증 명칭 및 이륙 중량", a: "명칭 : 초경량비행장치무인멀티콥터 조종자 1종 자격증,\n이륙중량: 1종 : 최대이륙중량 25kg초과~ 자체중량 150kg이하" },[cite: 5]
+    { id: 32, q: "지방항공청은 몇군데, 어디에 있나요", a: "1)서울: 서울, 인천, 경기, 강원, 충청, 대전, 세종, 전북, 전남 흑산(공항개발사무 한정)\n2)부산: 부산, 울산, 대구, 경상, 전남(흑산도제외), 광주\n3)제주: 제주특별자치도" },[cite: 5]
+    { id: 33, q: "관제탑 및 원자력발전소 비행금지거리는(비행공역)", a: "공항관제탑 9.3km이내/원전 18.6km이내 비행금지" },[cite: 5]
+    { id: 34, q: "드론 신고 절차", a: "교통안전공단신고, 드론원스탑 민원서비스 장치신고서, 기체 사진, 제작번호 사진, 기체 제원 및 성능표, 매매 계약서(소유증명서)" },[cite: 5]
+    { id: 35, q: "초경량비행장치 종류", a: "동력비행장치/동력패러글라이더/페러글라이더/ 행글라이더/회전익비행장치/무인비행장치/기구류/ 낙하산류" },[cite: 5]
+    { id: 36, q: "kv가 무엇인가요 예)모터120KV에 3V전압을 인가했을 때 회전수는 120X3)-360", a: "KV는 IV전압을 인가하였을 때 분당회전수\n(예시: 120KV x 22.2V 2개는 5,328RPM(1분에 5,328회전)" },[cite: 5]
+    { id: 37, q: "야간비행승인은 어디서 받나요", a: "관할지방항공청, (드론원스탑 민원서비스)" },[cite: 5]
+    { id: 38, q: "항공촬영 승인은 어디서 받나요", a: "국방부 (드론원스탑 민원서비스)" },[cite: 5]
+    { id: 39, q: "멀티콥터모터와 프로펠러 숫자에 의한 명칭", a: "8개: 옥토콥터, 6개: 헥사콥터, 4개: 쿼드콥터, 3개: 트라이콥터" },[cite: 5]
+    { id: 40, q: "가시권 및 비가시권 비행", a: "보이면 가시권, 안보이면 비가시권" },[cite: 5]
+    { id: 41, q: "GPS역할과 ATT의 차이점은", a: "GPS: 위치/자이로/기압계/지자계 작동\nATT: 자세&고도유지" },[cite: 5]
+    { id: 42, q: "1NM, 로티칼 마일은 몇 키로 미터", a: "1.85km" },[cite: 5]
+    { id: 43, q: "베르누이란", a: "유체의 속도가 증가하면 압력이 감소한다." },[cite: 5]
+    { id: 44, q: "비행에 작용하는 힘 4가지", a: "양력(수직↑), 추력(앞), 항력(반→), 중력(지↓)" },[cite: 5]
+    { id: 45, q: "페일세이프란", a: "조종기 송수신기 불능시 홈 포인트로 복귀하는 안전 기능" },[cite: 5]
+    { id: 46, q: "ESC장치란 무엇일까요?", a: "ESC(Electronic Speed Controller, 전자속도조절기)는 비행컨트롤러(FC)의 명령에 따라 모터의 회전속도를 조절하는 장치입니다. 쉽게 말하면 드론의 “모터 전력 조절기”입니다." },
+    { id: 47, q: "비행제한공역// 관제권 미승인 비행(공역위반)", a: "벌금 500만 원\n*비행제한공역은 항공고시보를 통해 유동적으로 관리되므로 반드시 승인을 받아야하며 더 엄하게 벌금형으로 처벌함." },[cite: 5]
+    { id: 48, q: "비행금지구역 p73, p518, p61~65 비행 시", a: "1년이하 징역 또는 벌금 1,000만 원" },[cite: 5]
+    { id: 49, q: "장치신고 및 변경신고 미실시 시", a: "6개월이하 징역 또는 벌금 500만 원" },[cite: 5]
+    { id: 50, q: "초경량비행장치 사업신고 미실시 or 안정성 미인증 장치로 조종자 증명 없이 비행 시", a: "1년이하 징역 또는 벌금 1,000만 원" },[cite: 5]
+    { id: 51, q: "음주비행 음주측정 거부시 (음주수치 0.02%)\n(0.02~0.06: 60일정지, 0.06~0.09: 120일정지, 0.09이상: 180일정지 또는 취소)", a: "3년이하 징역 또는 벌금 3,000만 원" },[cite: 5]
+    { id: 52, q: "말소신고 미실시 시", a: "과태료 30만 원" },[cite: 5]
+    { id: 53, q: "신고번호 미부착/허위 부착/구조 지원 장비 미부착 또는 미휴대 시", a: "과태료 100만 원" },[cite: 5]
+    { id: 54, q: "미승인 비행, 특별비행승인 범위 외(야간비행) 비행 시", a: "과태료 300만 원" },[cite: 5]
+    { id: 55, q: "조종자 증명을 빌리거나, 빌려주거, 알선한 경우 / 조종자 준수사항 미준수(고도 150m이상) 시", a: "과태료 300만 원" },[cite: 5]
+    { id: 56, q: "조종자 증명서 미취득 비행 시", a: "과태료 400만 원" },[cite: 5]
+    { id: 57, q: "조사간 허위진술, 업무정지 조치위반, 시정조치 지시위반. 조종자증명 받은 사람이 안정성 미인증 비행 시", a: "과태료 500만 원" }[cite: 5]
+];
+
+let excludedIds = new Set(JSON.parse(localStorage.getItem('drone_excluded') || '[]'));
+let starredIds = new Set(JSON.parse(localStorage.getItem('drone_starred') || '[]'));
+
+let currentList = [];
+let currentIndex = 0;
+let isAnswerVisible = false;
+
+function saveData() {
+    localStorage.setItem('drone_excluded', JSON.stringify(Array.from(excludedIds)));
+    localStorage.setItem('drone_starred', JSON.stringify(Array.from(starredIds)));
+}
+
+function prepareQuestions(shouldReShuffle = false) {
+    let list = quizData.filter(item => !excludedIds.has(item.id));
+    
+    const starOnly = document.getElementById('chkStarOnly').checked;
+    if (starOnly) {
+        list = list.filter(item => starredIds.has(item.id));
+    }
+
+    if (shouldReShuffle && document.getElementById('chkRandom').checked) {
+        list.sort(() => Math.random() - 0.5);
+    } else if (!document.getElementById('chkRandom').checked) {
+        list.sort((a, b) => a.id - b.id);
+    }
+
+    currentList = list;
+}
+
+function handleOptionChange(resetIndex = false) {
+    if (resetIndex) currentIndex = 0;
+    prepareQuestions(true);
+    renderUI();
+}
+
+function renderUI() {
+    const progressEl = document.getElementById('progress');
+    const cardEl = document.getElementById('card');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+
+    if (currentList.length === 0) {
+        progressEl.innerText = "남은 문제: 0개";
+        cardEl.innerHTML = `
+            <div class="empty-msg">
+                🎉 🎉 🎉<br>
+                <strong>모든 문제를 완벽하게 외우셨습니다!</strong><br><br>
+                하단의 '전체 학습 초기화'를 누르면 다시 복습할 수 있습니다.
+            </div>`;
+        btnPrev.disabled = true;
+        btnNext.disabled = true;
+        return;
+    }
+
+    if (currentIndex >= currentList.length) {
+        currentIndex = 0;
+    } else if (currentIndex < 0) {
+        currentIndex = currentList.length - 1;
+    }
+
+    const item = currentList[currentIndex];
+    progressEl.innerText = `남은 문제: ${currentList.length}개 (${currentIndex + 1}/${currentList.length})`;
+    
+    document.getElementById('qNum').innerText = `QUESTION ${String(item.id).padStart(2, '0')}`;
+    document.getElementById('qText').innerText = item.q;
+    document.getElementById('ansText').innerText = item.a;
+
+    const starBtn = document.getElementById('btnStar');
+    if (starredIds.has(item.id)) {
+        starBtn.classList.add('active');
+    } else {
+        starBtn.classList.remove('active');
+    }
+
+    btnPrev.disabled = false;
+    btnNext.disabled = false;
+
+    if (document.getElementById('chkAutoShow').checked) {
+        showAnswer();
+    } else {
+        hideAnswer();
+    }
+}
+
+function showAnswer() {
+    isAnswerVisible = true;
+    document.getElementById('ansBox').classList.add('show');
+    document.getElementById('btnToggle').innerText = '정답 숨기기';
+}
+
+function hideAnswer() {
+    isAnswerVisible = false;
+    document.getElementById('ansBox').classList.remove('show');
+    document.getElementById('btnToggle').innerText = '정답 확인하기';
+}
+
+function toggleAnswer() {
+    if (isAnswerVisible) {
+        hideAnswer();
+    } else {
+        showAnswer();
+    }
+}
+
+function nextQuestion() {
+    if (currentList.length === 0) return;
+    currentIndex = (currentIndex + 1) % currentList.length;
+    renderUI();
+}
+
+function prevQuestion() {
+    if (currentList.length === 0) return;
+    currentIndex = (currentIndex - 1 + currentList.length) % currentList.length;
+    renderUI();
+}
+
+function excludeQuestion() {
+    if (currentList.length === 0) return;
+    const item = currentList[currentIndex];
+    excludedIds.add(item.id);
+    saveData();
+    
+    prepareQuestions(false);
+    
+    if (currentIndex >= currentList.length) {
+        currentIndex = 0;
+    }
+    renderUI();
+}
+
+function toggleStar() {
+    if (currentList.length === 0) return;
+    const item = currentList[currentIndex];
+    if (starredIds.has(item.id)) {
+        starredIds.delete(item.id);
+    } else {
+        starredIds.add(item.id);
+    }
+    saveData();
+    renderUI();
+}
+
+function handleAutoShowToggle() {
+    if (document.getElementById('chkAutoShow').checked) {
+        showAnswer();
+    } else {
+        hideAnswer();
+    }
+}
+
+function resetAll() {
+    if (confirm("외운 문제 목록과 별표 체크를 모두 초기화하시겠습니까?")) {
+        excludedIds.clear();
+        starredIds.clear();
+        saveData();
+        location.reload();
+    }
+}
+
+let touchStartX = 0;
+let touchEndX = 0;
+const cardElement = document.getElementById('card');
+
+cardElement.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+}, false);
+
+cardElement.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+}, false);
+
+function handleSwipe() {
+    const threshold = 50;
+    if (touchEndX < touchStartX - threshold) {
+        nextQuestion();
+    }
+    if (touchEndX > touchStartX + threshold) {
+        prevQuestion();
+    }
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') nextQuestion();
+    if (e.key === 'ArrowLeft') prevQuestion();
+    if (e.key === ' ') {
+        e.preventDefault();
+        toggleAnswer();
+    }
+});
+
+prepareQuestions(true);
+renderUI();
+</script>
+
+</body>
+</html>
